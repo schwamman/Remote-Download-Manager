@@ -10,7 +10,16 @@ class DownloadRequest {
     this.folder = folder || '';
     this.name = name;
     this.state = {
-
+      "time": {
+        "elapsed": 0,
+        "remaining": '???'
+      },
+      "speed": '???',
+      "percent": 0,
+      "size": {
+        "total": '???',
+        "transferred": '???'
+      }
     }
   }
 }
@@ -54,7 +63,6 @@ class DownloadManager {
     .on('progress', (state) => {
       currentDownload.state = state;
       console.log('Progress', state.percent, state.speed);
-      console.log(JSON.stringify(state, null, 2));
       // this.percent = state.percent;
       // this.speed = state.speed;
       // this.size = state.size;
