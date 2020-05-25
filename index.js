@@ -9,6 +9,6 @@ require('dotenv').config();
 // };
 // mongoose.connect(process.env.MONGODB_URI, mongooseOptions);
 
-let PORT = process.env.PORT || 3000;
+let PORT = process.env.PORT || 6333;
 
 require('./src/server').start(PORT);

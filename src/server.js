@@ -22,7 +22,7 @@ app.use('/download', downloadRouter);
 module.exports = {
   server: app,
   start: (PORT) => {
-    app.listen(PORT, () => {
+    app.listen(PORT, "192.168.0.41", () => {
       console.log(`🍻 I know that you came to party baby, baby, baby, baby on port ${PORT} 🍻`);
     });
   },
