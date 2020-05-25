@@ -3,8 +3,13 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 
+//Required middleware and modules
+const notFound = require('./middleware/404');
+const errorHandler = require('./middleware/500');
+
 //Require Routes
-const downloadRouter = require('./downloadRouter');
+const downloadRouter = require('./routes/downloadRouter');
+const authRouter = require('./routes/auth');
 const app = express();
 
 
@@ -18,6 +23,11 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => res.send('Hello World!'));
 
 app.use('/download', downloadRouter);
+app.use(authRouter);
+
+//Catchalls
+app.use(notFound);
+app.use(errorHandler);
 
 module.exports = {
   server: app,

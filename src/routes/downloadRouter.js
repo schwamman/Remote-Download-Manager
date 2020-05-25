@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const DownloadManager = require('./downloadQueue');
+const DownloadManager = require('../downloadQueue');
 
 let queue = new DownloadManager();
 
