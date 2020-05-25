@@ -22,7 +22,6 @@ class Users extends Model {
 
   async logTime(userId) {
     let user = await schema.findByIdAndUpdate(userId, { last_signin: Date.now() });
-    console.log(user)
   }
 }
 

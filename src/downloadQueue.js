@@ -3,9 +3,12 @@
 const request = require('request');
 const progress = require('request-progress');
 const fs = require('fs');
+const Downloads = require('./models/downloads/downloads');
 
 class DownloadRequest {
-  constructor(path, folder, name) {
+  constructor(_id, type, path, folder, name) {
+    this._id = _id;
+    this.type = type;
     this.path = path;
     this.folder = folder || '';
     this.name = name;
@@ -42,8 +45,8 @@ class DownloadManager {
     this.currentDownload = null;
   }
 
-  addDownload(filePath, folder, name) {
-    const download = new DownloadRequest(filePath, folder, name);
+  addDownload(_id, type, downloadURL, folder, fileName) {
+    const download = new DownloadRequest(_id, type, downloadURL, folder, fileName);
     this.queue.push(download);
     this.startDownload();
   }
@@ -52,16 +55,21 @@ class DownloadManager {
     if (this.currentDownload) {
       return; //Already downloading.
     }
+    let progressCount = 0;
     const currentDownload = this.currentDownload = this.queue.shift();
     
     if(!currentDownload) {
       console.log('Finished: No more downloads in queue!')
       return; //Queue is empty
     }
-
-    const downloadPath = `./downloads/${currentDownload.folder}`;
+    
+    const downloadPath = `./downloads/${currentDownload.type}${currentDownload.folder ? '/' + currentDownload.folder : ''}`;
 
     makeDownloadFolderIfNotExists(downloadPath);
+
+    let downloads = new Downloads();
+    downloads.setStatus(currentDownload._id, 1)
+
     progress(request(currentDownload.path), {
       // throttle: 2000,                    // Throttle the progress event to 2000ms, defaults to 1000ms
       delay: 1000,                       // Only start to emit after 1000ms delay, defaults to 0ms
@@ -83,7 +91,7 @@ class DownloadManager {
           remainingTime = `Time Remaining: ${remainingSize / state.speed} sec`;
           break;
         case remainingSize >= 60 * state.speed && remainingSize < 3600 * state.speed:
-          remainingTime = `Time Remaining: ${Math.floor((remainingSize / state.speed) / 60) } mins ${Math.floor((remainingSize / state.speed) % 60)} secs`;
+          remainingTime = `Time Remaining: ${Math.floor((remainingSize / state.speed) / 60) } mins ${Math.round(Math.floor((remainingSize / state.speed) % 60))} secs`;
           break;
         case remainingSize >= 3600 * state.speed && remainingSize < 86400 * state.speed:
           remainingTime = `Time Remaining: ${Math.floor((remainingSize / state.speed) / 3600)} hours ${Math.floor(((remainingSize / state.speed) % 3600) / 60)} mins`;
@@ -96,14 +104,28 @@ class DownloadManager {
           break;
       }
 
+      if(progressCount < 1) {
+        downloads.setSize(currentDownload._id, state.size.total);
+      }
+
+      downloads.addProgress(currentDownload._id, state);
+
+      progressCount++;
       console.log('Progress:', percentage, speed, remainingTime);
     })
     .on('error', (err) => {
       console.log(`Error occured while downloading file ${currentDownload.path}:\n`, err);
+      downloads.setStatus(currentDownload._id, 3)
       this.currentDownload = null;
       this.startDownload();
     })
-    .on('end', () => {
+    .on('end', async () => {
+      let downloads = new Downloads();
+      let download = await downloads.setStatus(currentDownload._id, 2);
+      console.log(download);
+      let avgSpeed = download.total_size / (download.end_time - download.start_time);
+      await downloads.setAvgSpeed(download._id, avgSpeed)
+
       this.currentDownload = null;
       this.startDownload();
     })

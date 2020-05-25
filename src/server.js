@@ -9,7 +9,7 @@ const errorHandler = require('./middleware/500');
 
 //Require Routes
 const downloadRouter = require('./routes/downloadRouter');
-const authRouter = require('./routes/auth');
+const authRouter = require('./routes/authRouter');
 const app = express();
 
 
