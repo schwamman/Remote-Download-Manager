@@ -13,6 +13,7 @@ const Downloads = mongoose.Schema({
   start_time: { type: Number, required: false },
   end_time: { type: Number, required: false },
   avg_speed: { type: Number, required: false },
+  type: { type: String, required: true, default: 'Unknown'},
   progress_instances: { 
     type: [ 
       {

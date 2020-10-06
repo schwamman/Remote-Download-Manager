@@ -32,7 +32,7 @@ app.use(errorHandler);
 module.exports = {
   server: app,
   start: (PORT) => {
-    app.listen(PORT, "192.168.0.41", () => {
+    app.listen(PORT, "192.168.1.4", () => {
       console.log(`🍻 I know that you came to party baby, baby, baby, baby on port ${PORT} 🍻`);
     });
   },

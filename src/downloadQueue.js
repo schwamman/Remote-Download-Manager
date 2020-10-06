@@ -27,6 +27,7 @@ class DownloadRequest {
   }
 }
 
+
 function makeDownloadFolderIfNotExists(path) {
   const folders = path.split(/(!\.)\//);
   let current = '';
@@ -37,6 +38,24 @@ function makeDownloadFolderIfNotExists(path) {
       fs.mkdirSync(current);
     }
   }
+}
+
+function appendNameIfExists(path, name) {
+  let copyCount = 0;
+  let currentFilepath = path + '/' + name;
+  let copyName = name;
+  console.log('Here:', currentFilepath);
+
+  while(fs.existsSync(currentFilepath)) {
+    let splitName = name.split('.');
+    console.log(splitName);
+    splitName[splitName.length - 2] = splitName[splitName.length - 2] + `(${ ++copyCount })`
+
+    copyName = splitName.join('.');
+    currentFilepath = path + copyName;  
+  }
+  console.log(copyName);
+  return copyName;
 }
 
 class DownloadManager {
@@ -66,6 +85,7 @@ class DownloadManager {
     const downloadPath = `./downloads/${currentDownload.type}${currentDownload.folder ? '/' + currentDownload.folder : ''}`;
 
     makeDownloadFolderIfNotExists(downloadPath);
+    currentDownload.name = appendNameIfExists(downloadPath, currentDownload.name)
 
     let downloads = new Downloads();
     downloads.setStatus(currentDownload._id, 1)
@@ -123,7 +143,7 @@ class DownloadManager {
       let downloads = new Downloads();
       let download = await downloads.setStatus(currentDownload._id, 2);
       console.log(download);
-      let avgSpeed = download.total_size / (download.end_time - download.start_time);
+      let avgSpeed = download.total_size / ((download.end_time - download.start_time) / 1000);
       await downloads.setAvgSpeed(download._id, avgSpeed)
 
       this.currentDownload = null;

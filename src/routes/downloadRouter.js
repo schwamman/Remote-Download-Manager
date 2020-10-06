@@ -34,6 +34,7 @@ async function downloadFile(req, res) {
     user_id: req.user._id,
     status: 0,
     url: downloadURL,
+    type: type,
     filepath: `./downloads/${type}${folder ? '/' + folder : ''}`,
     filename: fileName,
     add_time: Date.now()
